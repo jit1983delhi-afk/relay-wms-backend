@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: relaywms
+      POSTGRES_USER: relay
+      POSTGRES_PASSWORD: relaypass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    environment:
+      DB_HOST: db
+      DB_NAME: relaywms
+      DB_USER: relay
+      DB_PASS: relaypass
+      JWT_SECRET: supersecretjwtkey
+      PORT: 4000
+    volumes:
+      - .:/app
+      - ./uploads:/app/uploads
+
+volumes:
+  pgdata:
