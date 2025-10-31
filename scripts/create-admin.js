@@ -1,18 +1,39 @@
+require('dotenv').config();
 const bcrypt = require('bcrypt');
-const sequelize = require('../src/config/db');
-const User = require('../src/models/user');
+const { Sequelize } = require('sequelize');
 
-async function run() {
-  await sequelize.authenticate();
-  await sequelize.sync();
-  const pw = 'Admin@1234';
-  const hash = await bcrypt.hash(pw, 10);
-  const [user, created] = await User.findOrCreate({
-    where: { employee_id: 'ADMIN-TWBP' },
-    defaults: { full_name: 'System Admin', email: 'admin@twbp.in', password_hash: hash, role: 'admin' }
-  });
-  console.log('Admin created:', user.employee_id, 'password:', pw);
-  process.exit(0);
-}
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
+});
 
-run().catch(e => { console.error(e); process.exit(1); });
+(async () => {
+  try {
+    // Create users table if not exists
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        employee_id VARCHAR(50) UNIQUE NOT NULL,
+        full_name VARCHAR(100),
+        role VARCHAR(50),
+        password_hash VARCHAR(255) NOT NULL
+      );
+    `);
+
+    // Create default admin user
+    const password = '987654321';
+    const hash = await bcrypt.hash(password, 10);
+
+    await sequelize.query(`
+      INSERT INTO users (employee_id, full_name, role, password_hash)
+      VALUES ('R3PL-TWBP-2033', 'Admin User', 'admin', '${hash}')
+      ON CONFLICT (employee_id) DO NOTHING;
+    `);
+
+    console.log('✅ Admin user created successfully');
+    process.exit(0);
+  } catch (err) {
+    console.error('❌ Error creating admin user:', err);
+    process.exit(1);
+  }
+})();
