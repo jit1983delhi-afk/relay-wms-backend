@@ -12,6 +12,7 @@
   "dotenv": "^16.0.3",
   "body-parser": "^1.20.2",
   "sequelize": "^6.35.1",
-  "exceljs": "^4.3.0"
+  "exceljs": "^4.3.0",
+  "pg": "^8.10.0"
 }
 }
