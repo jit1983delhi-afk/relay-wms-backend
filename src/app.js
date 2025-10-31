@@ -1,4 +1,4 @@
-// redeploy fix
+// redeploy fix - updated routes
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
