@@ -1,20 +1,20 @@
-# Use official Node image
-FROM node:18
+# Use stable Node version
+FROM node:18-slim
 
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Copy only package files first (for caching)
+# Copy dependency files
 COPY package*.json ./
 
-# Install all dependencies
-RUN npm install
+# Install dependencies safely (ignore optional, use cache)
+RUN npm install --no-optional --legacy-peer-deps
 
-# Copy rest of the project files
+# Copy app source
 COPY . .
 
-# Expose the backend port
+# Expose the app port
 EXPOSE 4000
 
-# Start the backend server
+# Start the backend
 CMD ["npm", "start"]
